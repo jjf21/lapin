@@ -3,8 +3,12 @@ class UserPolicy < ApplicationPolicy
     agent_and_belongs_to_record_organisation?
   end
 
+  def new?
+    create?
+  end
+
   def create?
-    agent_and_belongs_to_record_organisation?
+    user_and_is_record_or_is_parent? || agent_and_belongs_to_record_organisation?
   end
 
   def link_to_organisation?
@@ -16,15 +20,21 @@ class UserPolicy < ApplicationPolicy
   end
 
   def update?
-    if @user_or_agent.agent?
-      agent_and_belongs_to_record_organisation?
-    elsif @user_or_agent.user?
-      @record.id == @user_or_agent.id
-    end
+    user_and_is_record_or_is_parent? || agent_and_belongs_to_record_organisation?
+  end
+
+  def edit?
+    update?
   end
 
   def destroy?
-    agent_and_belongs_to_record_organisation?
+    user_and_is_record_or_is_parent? || agent_and_belongs_to_record_organisation?
+  end
+
+  private
+
+  def user_and_is_record_or_is_parent?
+    @user_or_agent.user? && [@record.parent_id, @record.id].include?(@user_or_agent.id)
   end
 
   class Scope
@@ -36,7 +46,11 @@ class UserPolicy < ApplicationPolicy
     end
 
     def resolve
-      @user_or_agent.agent? ? scope.all : scope.none
+      if @user_or_agent.agent?
+        scope.all
+      else
+        scope.where(parent_id: @user_or_agent.id)
+      end
     end
   end
 end
