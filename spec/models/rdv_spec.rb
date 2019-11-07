@@ -123,9 +123,9 @@ describe Rdv, type: :model do
   end
 
   describe "#associate_users_with_organisation" do
-    let(:organisation) { create(:organisation) }
-    let(:user) { create(:user, organisations: [organisation]) }
-    let(:rdv) { build(:rdv, users: [user], organisation: create(:organisation)) }
+    let!(:organisation) { create(:organisation) }
+    let!(:user) { create(:user, organisations: [organisation]) }
+    let!(:rdv) { build(:rdv, users: [user], organisation: create(:organisation)) }
 
     subject do
       rdv.save
