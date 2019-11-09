@@ -65,6 +65,10 @@ class User < ApplicationRecord
     Time.zone.now.to_date - birth_date
   end
 
+  def soft_delete
+    delete
+  end
+
   protected
 
   def password_required?
